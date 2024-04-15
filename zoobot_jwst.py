@@ -65,8 +65,11 @@ if __name__ == '__main__':
         name='hf_hub:mwalmsley/zoobot-encoder-convnext_nano',
         schema=schema,
         n_blocks=5,
-        learning_rate=1e-4,
-        lr_decay=0.5
+        learning_rate=5e-5,
+        lr_decay=0.5,
+        cosine_schedule=True,
+        warmup_epochs=5,
+        max_cosine_epochs=40,
     )
     
     # TODO set this to wherever you'd like to save your results
