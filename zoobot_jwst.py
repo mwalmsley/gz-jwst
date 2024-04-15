@@ -66,10 +66,11 @@ if __name__ == '__main__':
         schema=schema,
         n_blocks=5,
         learning_rate=5e-5,
-        lr_decay=0.5,
-        cosine_schedule=True,
-        warmup_epochs=5,
-        max_cosine_epochs=40,
+        lr_decay=0.3
+        # TODO learning rate never leaves 0 for some reason?
+        # cosine_schedule=True,
+        # warmup_epochs=5,
+        # max_cosine_epochs=40,
     )
     
     # TODO set this to wherever you'd like to save your results
