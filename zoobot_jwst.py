@@ -63,7 +63,10 @@ if __name__ == '__main__':
 
     model = finetune.FinetuneableZoobotTree(
         name='hf_hub:mwalmsley/zoobot-encoder-convnext_nano',
-        schema=schema
+        schema=schema,
+        n_blocks=5,
+        learning_rate=1e-4,
+        lr_decay=0.5
     )
     
     # TODO set this to wherever you'd like to save your results
@@ -89,3 +92,4 @@ if __name__ == '__main__':
         datamodule_kwargs=datamodule_kwargs,
         trainer_kwargs=trainer_kwargs
     )
+
