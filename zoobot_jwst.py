@@ -84,7 +84,7 @@ if __name__ == '__main__':
     from pytorch_lightning.loggers import WandbLogger
     logger = WandbLogger(project='gz-jwst', name='debug')
 
-    trainer = finetune.get_trainer(save_dir=save_dir, logger=logger, accelerator=accelerator, epochs=1)
+    trainer = finetune.get_trainer(save_dir=save_dir, logger=logger, accelerator=accelerator, max_epochs=1)
     trainer.fit(model, datamodule)
 
     # now save predictions on test set to evaluate performance
