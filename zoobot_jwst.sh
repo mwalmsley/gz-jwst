@@ -7,4 +7,4 @@
 
 nvidia-smi
 
-srun /share/nas2/walml/miniconda3/envs/zoobot39_cu118_dev/bin/python /share/nas2/walml/repos/zoobot_jwst/zoobot_jwst.py
+srun /share/nas2/walml/miniconda3/envs/zoobot39_cu118_dev/bin/python /share/nas2/walml/repos/gz-jwst/zoobot_jwst.py
