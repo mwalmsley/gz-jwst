@@ -49,7 +49,7 @@ if __name__ == '__main__':
     # pd.DataFrame with columns 'id_str' (unique id), 'file_loc' (path to image),
     # and label_cols (e.g. smooth-or-featured-cd_smooth) with count responses
     train_and_val_catalog, _ = gz_jwst(root=data_download_dir, train=True, download=True)
-    test_catalog, _ = gz_jwst(root=data_download_dir, train=True, download=True)
+    test_catalog, _ = gz_jwst(root=data_download_dir, train=False, download=True)
 
     train_catalog, val_catalog = train_test_split(train_and_val_catalog, test_size=0.3)
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     from pytorch_lightning.loggers import WandbLogger
     logger = WandbLogger(project='gz-jwst', name='debug')
 
-    trainer = finetune.get_trainer(save_dir=save_dir, logger=logger, accelerator=accelerator, max_epochs=1)
+    trainer = finetune.get_trainer(save_dir=save_dir, logger=logger, accelerator=accelerator)
     trainer.fit(model, datamodule)
 
     # now save predictions on test set to evaluate performance
@@ -102,4 +102,4 @@ if __name__ == '__main__':
         trainer_kwargs=trainer_kwargs
     )
 
-    prediction_hdf5_to_summary_parquet(hdf5_loc=hdf5_loc, save_loc=hdf5_loc.replace('.hdf5', 'summary.csv'), schema=schema)
+    prediction_hdf5_to_summary_parquet(hdf5_loc=hdf5_loc, save_loc=hdf5_loc.replace('.hdf5', 'summary.parquet'), schema=schema)
