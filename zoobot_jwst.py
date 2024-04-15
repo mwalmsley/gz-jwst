@@ -2,6 +2,7 @@ import logging
 import os
 
 import numpy as np
+import torch
 from sklearn.model_selection import train_test_split
 
 from galaxy_datasets.pytorch.galaxy_datamodule import GalaxyDataModule
@@ -10,6 +11,7 @@ from galaxy_datasets.shared.gz_jwst import gz_jwst
 from zoobot.pytorch.training import finetune
 from zoobot.pytorch.predictions import predict_on_catalog
 from zoobot.shared.schemas import gz_jwst_schema
+from zoobot.shared.load_predictions import prediction_hdf5_to_summary_parquet
 
 """
 Adapted from Zoobot full tree example
@@ -33,6 +35,7 @@ if __name__ == '__main__':
         batch_size = 64  
         prog_bar = False
         max_galaxies = None
+        torch.set_float32_matmul_precision('high')  # for A100 etc
     else:  # test locally
         repo_dir = '/Users/user/repos'
         data_download_dir = '/Users/user/repos/galaxy-datasets/roots/gz_jwst'
@@ -81,19 +84,22 @@ if __name__ == '__main__':
     from pytorch_lightning.loggers import WandbLogger
     logger = WandbLogger(project='gz-jwst', name='debug')
 
-    trainer = finetune.get_trainer(save_dir=save_dir, logger=logger, accelerator=accelerator)
+    trainer = finetune.get_trainer(save_dir=save_dir, logger=logger, accelerator=accelerator, epochs=1)
     trainer.fit(model, datamodule)
 
     # now save predictions on test set to evaluate performance
     datamodule_kwargs = {'batch_size': batch_size, 'resize_after_crop': resize_after_crop}
     trainer_kwargs = {'devices': 1, 'accelerator': accelerator}
+
+    hdf5_loc = os.path.join(save_dir, 'test_predictions.hdf5')
     predict_on_catalog.predict(
         test_catalog,
         model,
-        n_samples=1,
+        n_samples=5,
         label_cols=schema.label_cols,
-        save_loc=os.path.join(save_dir, 'test_predictions.csv'),
+        save_loc=hdf5_loc,
         datamodule_kwargs=datamodule_kwargs,
         trainer_kwargs=trainer_kwargs
     )
 
+    prediction_hdf5_to_summary_parquet(hdf5_loc=hdf5_loc, save_loc=hdf5_loc.replace('.hdf5', 'summary.csv'), schema=schema)
