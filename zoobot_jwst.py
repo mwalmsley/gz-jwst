@@ -87,6 +87,7 @@ if __name__ == '__main__':
     datamodule_kwargs = {'batch_size': batch_size, 'resize_after_crop': resize_after_crop}
     trainer_kwargs = {'devices': 1, 'accelerator': accelerator}
 
+    # test preds
     hdf5_loc = os.path.join(save_dir, 'test_predictions.hdf5')
     predict_on_catalog.predict(
         test_catalog,
@@ -97,5 +98,20 @@ if __name__ == '__main__':
         datamodule_kwargs=datamodule_kwargs,
         trainer_kwargs=trainer_kwargs
     )
-
     prediction_hdf5_to_summary_parquet(hdf5_loc=hdf5_loc, save_loc=hdf5_loc.replace('.hdf5', 'summary.parquet'), schema=schema)
+
+    # train preds
+    hdf5_loc = os.path.join(save_dir, 'train_predictions.hdf5')
+    predict_on_catalog.predict(
+        train_catalog,
+        model,
+        n_samples=5,
+        label_cols=schema.label_cols,
+        save_loc=hdf5_loc,
+        datamodule_kwargs=datamodule_kwargs,
+        trainer_kwargs=trainer_kwargs
+    )
+    prediction_hdf5_to_summary_parquet(hdf5_loc=hdf5_loc, save_loc=hdf5_loc.replace('.hdf5', 'summary.parquet'), schema=schema)
+
+    # representations
+    
