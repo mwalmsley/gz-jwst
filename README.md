@@ -23,3 +23,9 @@ We already have the code to do most if not all of this. We're putting it on GitH
 3. Kameswara's SEP script to make catalogs
 4. David's cutout script to extract single-band cutouts from the mosaics
 5. Hayley's colouring to make images (probably with tweaks)
+
+The most likely first surveys, selected simply by size, are 
+- CEERS (including public data release v0.6, 200arcmin2)
+- JADES (190arcmin2, possibly including GOODS-N as well as GOODS-N if it's on MAST yet)
+- COSMOS-WEB (77arcmin2 now but 900arcmin2 from August)
+And possibly PASSAGES, but it may only have one band.
