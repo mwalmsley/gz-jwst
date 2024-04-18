@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 from scipy import ndimage
 import warnings
+from astropy.table import Table
 
 
 def identify_objects(image_data,nsigma,min_area,deb_n_thresh,deb_cont,filter_kwarg,filter_size):
@@ -50,7 +51,17 @@ def extract_objects_from_mosaic(filename):
     image_data = fits.getdata(filename, memmap=True)
     mosaic_part1, mosaic_part2 = chop_larger_mosaic(image_data, chop_loc=4500, along_which_axis='y')
 
-    return
+    for mosaic in [mosaic_part1, mosaic_part2]:
+        objects, segmap = identify_objects(mosaic, nsigma=3,min_area=10,deb_n_thresh=32,
+                                        deb_cont=0.0001,filter_kwarg='tophat',filter_size=7)
+        
+        objects_table = Table(objects, names=list(objects.dtype.names))
+        objects_table['object_id'] = np.arange(len(objects_table))+1
+        chip_gap_mask = make_chip_gap_mask(mosaic)
+
+        dilated_chip_gap_mask = dilate_mask(chip_gap_mask, number_of_dilations=25)
+        cleaned_mask = clean_artefacts_from_segmap(segmap,dilated_chip_gap_mask)
+    return cleaned_mask
 
 
 def chop_larger_mosaic(mosaic_data, chop_loc, along_which_axis='both'):
@@ -70,9 +81,9 @@ def make_chip_gap_mask(raw_image_data):
     chip_gap_mask[np.where(raw_image_data == 0)] = 1
     return chip_gap_mask
 
-def dilate_mask(initial_mask, number_of_dilations):
+def dilate_mask(initial_mask, number_of_dilations=25):
     dilation_structure = ndimage.generate_binary_structure(2, 2)
-    dilated_mask = ndimage.binary_dilation(initial_mask, structure=dilation_structure, iterations=25, border_value=1).astype(int)
+    dilated_mask = ndimage.binary_dilation(initial_mask, structure=dilation_structure, iterations=number_of_dilations, border_value=1).astype(int)
     return dilated_mask
 
 
