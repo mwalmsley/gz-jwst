@@ -61,7 +61,8 @@ def extract_objects_from_mosaic(filename):
 
         dilated_chip_gap_mask = dilate_mask(chip_gap_mask, number_of_dilations=25)
         cleaned_mask = clean_artefacts_from_segmap(segmap,dilated_chip_gap_mask)
-    return cleaned_mask
+        processed_table = process_object_table(objects_table, segmap,dilated_chip_gap_mask)
+    return processed_table, cleaned_mask
 
 
 def chop_larger_mosaic(mosaic_data, chop_loc, along_which_axis='both'):
@@ -93,3 +94,8 @@ def clean_artefacts_from_segmap(original_segmap, chip_mask):
     for each_artefact in np.unique(original_segmap*chip_mask):
         processed_segmask[np.where(processed_segmask == each_artefact)] = 0
     return processed_segmask
+
+
+def process_object_table(raw_object_table, original_segmap, chip_mask):
+    processed_table = raw_object_table.remove_rows(np.unique(original_segmap*chip_mask)[1:].astype(int)-1)
+    return processed_table
