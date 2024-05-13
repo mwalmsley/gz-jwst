@@ -19,15 +19,11 @@ from PIL import Image
 import os
 
 ## Functions
-def create_cutout(ra, dec, size, source_id, fits_path = None, save_loc = None):
+def create_cutout(ra, dec, sizes, source_ids, fits_path = None):
 
     # Checking that a FITS file has been entered.
     if not fits_path:
         Exception('Path to a FITS file is required!')
-
-    if not save_loc:
-         save_loc = os.getcwd()
-         Warning('No save location provided. Saving cutouts in the current working directory.')
 
     # Open the FITS file.
     with fits.open(fits_path) as hdul:
@@ -36,17 +32,18 @@ def create_cutout(ra, dec, size, source_id, fits_path = None, save_loc = None):
 
     # Create the WCS and the SkyCoord at the centre of the cutout.
     w = WCS(header)
-    coord = SkyCoord(ra = ra * u.deg, dec = dec * u.deg, frame = 'icrs')
+    coords = SkyCoord(ra = ra * u.deg, dec = dec * u.deg, frame = 'icrs')
     
-    cutout = Cutout2D(data, coord, size, wcs = w, mode = 'partial')
+    # Initialise a dictionary which will link the source ID to the output flux values.
+    flux_values = {}
 
-    # Create the image parameters.
-    interval = ZScaleInterval(nsamples=5000, contrast=0.001)
-    stretch = SqrtStretch()
-    im_norm = stretch(interval(cutout.data))
+    # Loop through all given parameters and create a dictionary of cutouts.
+    for source_id, coord, size in zip(source_ids, coords, sizes):
 
-    # Image created and saved as a .jpeg.
-    im = (Image.fromarray(np.uint8(cm.Greys_r(im_norm)*255))).convert('RGB')
-    im.save(f'{save_loc}/{source_id}.jpeg')
+        # Create the cutout.
+        cutout = Cutout2D(data, coord, size, wcs = w, mode = 'partial')
 
-    return f'{save_loc}/{source_id}.jpeg'
+        # Calculate the hyper parameters of the image.
+        flux_values[source_id] = cutout.data
+    
+    return flux_values
