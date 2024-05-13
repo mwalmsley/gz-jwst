@@ -5,15 +5,8 @@
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 import astropy.units as u
-from astropy.visualization import ZScaleInterval, SqrtStretch
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
-
-# Base Packages
-import numpy as np
-from matplotlib import cm
-from PIL import Image
-import os
 
 ## Functions
 

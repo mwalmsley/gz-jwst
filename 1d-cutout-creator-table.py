@@ -1,22 +1,12 @@
 # Creating the 1D Cutouts Assuming with a DataFrame / Astropy Table architecture
 
 ## Imports
-# Archive requirements
-from astroquery.esasky import ESASky
-
 # Astropy Stuff
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 import astropy.units as u
-from astropy.visualization import ZScaleInterval, SqrtStretch
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
-
-# Base Packages
-import numpy as np
-from matplotlib import cm
-from PIL import Image
-import os
 
 ## Functions
 def create_cutout(ra, dec, sizes, source_ids, fits_path = None):
