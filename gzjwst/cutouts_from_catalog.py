@@ -6,8 +6,6 @@ Should also expect parameters controlling the cutout colouring, dynamic range, e
 
 import pandas as pd
 import numpy as np
-from PIL import Image
-
 
 from astropy.io import fits
 from astropy.wcs import WCS
@@ -17,11 +15,8 @@ import astropy.units as u
 
 
 def make_single_band_cutout(galaxy: pd.Series, data: np.array, header: fits.header.Header):
-    # Check that the FITS file has been provided.
-    if not data or not header:
-        Exception('Path to a FITS file is required!')
-
     # Note, may have to update the entries extracted here depending on name in final file.
+    # Assumed that ra, dec and size are in deg, deg and arcseconds respectively. Change if thought!
     ra = galaxy.RA
     dec = galaxy.DEC
     size = galaxy.size
@@ -31,7 +26,7 @@ def make_single_band_cutout(galaxy: pd.Series, data: np.array, header: fits.head
     coord = SkyCoord(ra = ra * u.deg, dec = dec * u.deg, frame = 'icrs')
 
     # Create the Cutout
-    cutout = Cutout2D(data, coord, size, wcs = w, mode = 'partial')
+    cutout = Cutout2D(data, coord, size * u.arcsec, wcs = w, mode = 'partial')
 
     flux_values = cutout.data
 
