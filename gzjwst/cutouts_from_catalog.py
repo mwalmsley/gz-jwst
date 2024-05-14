@@ -35,9 +35,7 @@ def make_single_band_cutout(galaxy: pd.Series, data: np.array, header: fits.head
 
     flux_values = cutout.data
 
-    cutout_resize = np.asarray((Image.fromarray(flux_values)).resize((300,300)))
-
-    return cutout_resize    
+    return flux_values 
 
 
 # TODO etc for other band combinations, copy from Hayley's notebook
