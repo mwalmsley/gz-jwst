@@ -164,3 +164,6 @@ wandb
 *.csv
 *.DS_Store
 .history/*
+mastDownload*.sh
+MANIFEST.HTML
+*.fits.gz

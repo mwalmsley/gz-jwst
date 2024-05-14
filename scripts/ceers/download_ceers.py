@@ -1,7 +1,10 @@
+import os
+
 from gzjwst.survey_products import get_observations_by_provenance_name, download_mast_products
 
 PROVENANCE_NAME = 'ceers'
-CEERS_DATA_DIRECTORY = '../../data/ceers/hlsp'
+
+CEERS_DATA_DIRECTORY = os.path.abspath(os.path.dirname(__file__)) + '/../../data/ceers/hlsp'
 CEERS_NIRCAM_FILTERS = ['F115W', 'F150W', 'F200W', 'F277W', 'F356W', 'F410M', 'F444W']
 
 # get all data products associated with CEERS
