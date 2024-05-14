@@ -17,16 +17,16 @@ import astropy.units as u
 def make_single_band_cutout(galaxy: pd.Series, data: np.array, header: fits.header.Header):
     # Note, may have to update the entries extracted here depending on name in final file.
     # Assumed that ra, dec and size are in deg, deg and arcseconds respectively. Change if thought!
-    ra = galaxy.RA
-    dec = galaxy.DEC
-    size = galaxy.size
+    ra = galaxy.RA * u.deg
+    dec = galaxy.DEC * u.deg
+    size = galaxy.size * u.arcsec
 
     # Create the WCS and a list of SkyCoords.
     w = WCS(header)
-    coord = SkyCoord(ra = ra * u.deg, dec = dec * u.deg, frame = 'icrs')
+    coord = SkyCoord(ra = ra, dec = dec, frame = 'icrs')
 
     # Create the Cutout
-    cutout = Cutout2D(data, coord, size * u.arcsec, wcs = w, mode = 'partial')
+    cutout = Cutout2D(data, coord, size, wcs = w, mode = 'partial')
 
     flux_values = cutout.data
 
