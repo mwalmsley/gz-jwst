@@ -25,7 +25,8 @@ def get_filenames_for_proposal(proposal_id: str) -> List[str]:
             obs_collection = 'JWST',
             proposal_id = proposal_id,
             calib_level = 3,
-            dataRights = 'Public'
+            dataRights = 'Public',
+            # filters = ['F115W']   # Specify filters as well?
         )
         .to_pandas()
     )
