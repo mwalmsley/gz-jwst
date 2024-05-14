@@ -6,6 +6,8 @@ Should also expect parameters controlling the cutout colouring, dynamic range, e
 
 import pandas as pd
 import numpy as np
+from PIL import Image
+
 
 from astropy.io import fits
 from astropy.wcs import WCS
@@ -33,7 +35,9 @@ def make_single_band_cutout(galaxy: pd.Series, data: np.array, header: fits.head
 
     flux_values = cutout.data
 
-    return flux_values    
+    cutout_resize = np.asarray((Image.fromarray(flux_values)).resize((300,300)))
+
+    return cutout_resize    
 
 
 # TODO etc for other band combinations, copy from Hayley's notebook
