@@ -48,27 +48,27 @@ def download_mast_products(products, save_dir, max_files=3, chunk_size=None, cur
         products = products[:max_files]
         print('More filenames provided than the maximum number of files to download')
         print('(Set chunk_size if you wish to download files in chunks)')
-        print('Downloading the first '+str(max_files)+' files('+str(round(products['size'].sum()/1e9,2))+' GB)')
+        print('Downloading the first '+str(max_files)+' files('+str(round(products['size'].sum()/1e9,2))+' GB)\n')
 
         manifest = Observations.download_products(products, productType=['SCIENCE'], download_dir=save_dir, flat=True, curl_flag=curl_flag)
 
     elif len(products) <= max_files and not chunk_size:
-        print('Downloading '+str(len(products)) + ' files ('+str(round(products['size'].sum()/1e9,2))+' GB)')
+        print('Downloading '+str(len(products)) + ' files ('+str(round(products['size'].sum()/1e9,2))+' GB)\n')
         manifest = Observations.download_products(products, productType=['SCIENCE'], download_dir=save_dir, flat=True, curl_flag=curl_flag)
 
 
     elif len(products) <= max_files and chunk_size:
         if chunk_size > 5:
             chunk_size = 5
-            print('Chunk size cannot be bigger than 5. Defaulting to 5.')
+            print('Chunk size cannot be bigger than 5. Defaulting to 5.\n')
 
         print('Downloading '+str(len(products)) + ' files ('+str(round(products['size'].sum()/1e9,2))+' GB)')
-        print('Splitting into chunks of '+str(chunk_size)+' files')
+        print('Splitting into chunks of '+str(chunk_size)+' files\n')
     
         chunks = [products[i:i+chunk_size] for i in range(0, len(products), chunk_size)]
         for i, chunk in enumerate(chunks):
             print('\nChunk '+str(i+1)+' of '+str(len(chunks)))
-            print('Downloading '+str(len(chunk)) + ' files ('+str(round(chunk['size'].sum()/1e9,2))+' GB)')
+            print('Downloading '+str(len(chunk)) + ' files ('+str(round(chunk['size'].sum()/1e9,2))+' GB)\n')
             manifest = Observations.download_products(chunk, productType=['SCIENCE'], download_dir=save_dir, flat=True, curl_flag=curl_flag)
 
        
