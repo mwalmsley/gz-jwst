@@ -76,3 +76,8 @@ def download_mast_products(products, save_dir, max_files=3, chunk_size=None, cur
     #    TODO use requests or similar to download a few
     # or use curl_flag=True for script version, TBD
     # output should be level 3 products download to appropriate directory
+
+# TODO replace the curl scripts with our own wget/curl that uses the list of urls from file option, pointed at the MAST urls like these
+"""
+curl --globoff --location-trusted -f --progress-bar --create-dirs $CONT --output ./${DOWNLOAD_FOLDER}'/HLSP/hlsp_ceers_jwst_nircam_nircam2_f200w_v0.5_i2d/hlsp_ceers_jwst_nircam_nircam2_f200w_v0.5_i2d.fits.gz' 'https://mast.stsci.edu/api/v0.1/Download/file?bundle_name=MAST_2024-05-14T1721.sh&uri=mast:HLSP/ceers/nircam/hlsp_ceers_jwst_nircam_nircam2_f200w_v0.5_i2d.fits.gz'
+"""
