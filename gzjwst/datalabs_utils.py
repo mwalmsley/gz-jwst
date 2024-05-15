@@ -1,17 +1,11 @@
-"""
-Just a refactor of the below 'large download' script from the STScI GitHub repo.
-https://github.com/spacetelescope/notebooks/blob/master/notebooks/MAST/Astroquery/large_downloads/companion_script.py
-"""
 
 from astroquery.mast import Observations
 
 import os
 import glob
 
-import typing
 
-
-def get_datalabs_filenames_for_proposal(proposal_id: str) -> List[str]:
+def get_datalabs_filenames_for_proposal(proposal_id: str) -> list[str]:
     """
     Get the filenames for a given proposal ID.
     """
@@ -58,4 +52,3 @@ def get_datalabs_filenames_for_proposal(proposal_id: str) -> List[str]:
         filenames.append(filename_list[0])
         
     return filenames
-
