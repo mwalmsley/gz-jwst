@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
 
     PROVENANCE_NAME = 'ceers'
-    DATA_DIRECTORY = os.path.abspath(os.path.dirname(__file__)) + '/../../data/ceers/hlsp'
+    DATA_DIRECTORY = 'data/ceers/hlsp'
     # NIRCAM_FILTERS = ['F115W', 'F150W', 'F200W', 'F277W', 'F356W', 'F410M', 'F444W']
 
     # get all data products associated with CEERS

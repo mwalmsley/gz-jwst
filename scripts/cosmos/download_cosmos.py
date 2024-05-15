@@ -8,7 +8,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
     PROPOSAL_ID = '1727'
-    DATA_DIRECTORY = 'data/cosmos/hlsp'
+    DATA_DIRECTORY = 'data/cosmos/stage_3_science_products'
 
     # get all data products
     data_products = get_observations(proposal_id=PROPOSAL_ID, query_kwargs={'instrument_name':'NIRCAM/IMAGE'})
