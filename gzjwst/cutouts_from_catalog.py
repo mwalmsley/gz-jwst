@@ -4,9 +4,34 @@ i.e.: a path to a (in general, multiple) fits files, plus coordinate and sizing 
 Should also expect parameters controlling the cutout colouring, dynamic range, etc
 """
 
+import pandas as pd
+import numpy as np
 
-def make_single_band_cutout(galaxy: pd.Series, todo_more_params):
-    pass  # should return nd array ready to be saved as jpg/png
+from astropy.io import fits
+from astropy.wcs import WCS
+from astropy.nddata import Cutout2D
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+
+
+def make_single_band_cutout(galaxy: pd.Series, data: np.array, header: fits.header.Header):
+    # Note, may have to update the entries extracted here depending on name in final file.
+    # Assumed that ra, dec and size are in deg, deg and arcseconds respectively. Change if thought!
+    ra = galaxy.RA * u.deg
+    dec = galaxy.DEC * u.deg
+    size = galaxy.size * u.arcsec
+
+    # Create the WCS and a list of SkyCoords.
+    w = WCS(header)
+    coord = SkyCoord(ra = ra, dec = dec, frame = 'icrs')
+
+    # Create the Cutout
+    cutout = Cutout2D(data, coord, size, wcs = w, mode = 'partial')
+
+    flux_values = cutout.data
+
+    return flux_values 
+
 
 
 # TODO etc for other band combinations, copy from Hayley's notebook
