@@ -167,3 +167,4 @@ wandb
 mastDownload*.sh
 MANIFEST.HTML
 *.fits.gz
+*.fits
