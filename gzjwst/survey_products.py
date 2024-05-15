@@ -7,24 +7,18 @@ import logging
 
 from astroquery.mast import Observations
 
-def get_observations_by_proposal_id(proposal_id: str):
+def get_observations(provenance_name=None, proposal_id=None, query_kwargs={}):
     """
-    Get a table of observations for a given proposal ID.
-    """
-    # Get the list of observations for this proposal
-    obs_table = Observations.query_criteria(proposal_id=proposal_id)
-
-    # Get the list of products for each observation
-    products = Observations.get_product_list(obs_table)
-
-    return products
-
-def get_observations_by_provenance_name(provenance_name: str):
-    """
-    Get a table of observations for a given provenance name.
+    Get a table of observations for a given proposal ID or provenance name.
     """
     # Get the list of observations for this proposal
-    obs_table = Observations.query_criteria(provenance_name=provenance_name)
+    if proposal_id and not provenance_name:
+        obs_table = Observations.query_criteria(proposal_id=proposal_id, **query_kwargs)
+    elif provenance_name and not proposal_id:
+        obs_table = Observations.query_criteria(provenance_name=provenance_name, **query_kwargs)
+    else:
+        print('You must provide either a proposal ID or provenance name, but not both.')
+        return
 
     # Get the list of products for each observation
     products = Observations.get_product_list(obs_table)
@@ -42,7 +36,6 @@ def download_mast_products_simplified(products, save_dir, max_files=None, cache=
         filename = os.path.basename(product_uri)
         local_path = os.path.join(save_dir, filename)
         Observations.download_file(uri=product_uri, local_path=local_path, cache=cache)
-
 
 
 # def download_mast_products(products, save_dir, max_files=3, chunk_size=None, curl_flag=False):
@@ -77,7 +70,7 @@ def download_mast_products_simplified(products, save_dir, max_files=None, cache=
 
 #         print('Downloading '+str(len(products)) + ' files ('+str(round(products['size'].sum()/1e9,2))+' GB)')
 #         print('Splitting into chunks of '+str(chunk_size)+' files\n')
-    
+
 #         chunks = [products[i:i+chunk_size] for i in range(0, len(products), chunk_size)]
 #         for i, chunk in enumerate(chunks):
 #             print('\nChunk '+str(i+1)+' of '+str(len(chunks)))
