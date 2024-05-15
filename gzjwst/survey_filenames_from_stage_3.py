@@ -2,6 +2,7 @@
 Just a refactor of the below 'large download' script from the STScI GitHub repo.
 https://github.com/spacetelescope/notebooks/blob/master/notebooks/MAST/Astroquery/large_downloads/companion_script.py
 """
+
 from astroquery.mast import Observations
 
 import os
@@ -10,12 +11,10 @@ import glob
 import typing
 
 
-
-def get_filenames_for_proposal(proposal_id: str) -> List[str]:
+def get_datalabs_filenames_for_proposal(proposal_id: str) -> List[str]:
     """
     Get the filenames for a given proposal ID.
     """
-
     volume_path = '/data/user/jwst_jwst01_data/jwst-artifacts-repository'
 
     # Get the list of observations for this proposal
@@ -57,15 +56,6 @@ def get_filenames_for_proposal(proposal_id: str) -> List[str]:
         
         # Append the full filepath to the initialised list.
         filenames.append(filename_list[0])
-
+        
     return filenames
 
-def download_filenames(filenames, save_dir, max_files=3):
-       manifest = Observations.download_products(
-               files
-               , curl_flag=False
-               , productType=['SCIENCE']
-               )
-    #    TODO use requests or similar to download a few
-    # or use curl_flag=True for script version, TBD
-    # output should be level 3 products download to appropriate directory
