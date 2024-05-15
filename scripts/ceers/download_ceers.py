@@ -1,6 +1,6 @@
 import os
 
-from gzjwst.survey_products import get_observations_by_provenance_name, download_mast_products_simplified
+from gzjwst.survey_products import get_observations, download_mast_products_simplified
 
 PROVENANCE_NAME = 'ceers'
 DATA_DIRECTORY = os.path.abspath(os.path.dirname(__file__)) + '/../../data/ceers/hlsp'
@@ -24,7 +24,7 @@ assert len(data_products_fixed_pointing2) == 28, "CEERS should have 28 images, a
 
 
 # convert to pandas and save
-df = data_products_nircam_fixed_pointing2.to_pandas()
+df = data_products_fixed_pointing2.to_pandas()
 assert not any(df['obsID'].duplicated()), "There are duplicate obsIDs in the CEERS data"
 df.to_csv(DATA_DIRECTORY + '/products_to_download.csv', index=False)  # for future reference/debugging
 
