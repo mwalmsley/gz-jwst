@@ -1,6 +1,6 @@
 import os
 
-from gzjwst.survey_products import get_observations_by_provenance_name, download_mast_products
+from gzjwst.survey_products import get_observations_by_provenance_name, download_mast_products_simplified
 
 PROVENANCE_NAME = 'ceers'
 
@@ -27,8 +27,16 @@ data_products_nircam_fixed_pointing2 = data_products_nircam[omit_additonal_point
 # ok, we have 7 filters, 4 pointings, so we should expect 28
 assert len(data_products_nircam_fixed_pointing2) == 28, "CEERS should have 28 images, ask Hayley what went wrong"
 
+
+# convert to pandas and save
+df = data_products_nircam_fixed_pointing2.to_pandas()
+assert not any(df['obsID'].duplicated()), "There are duplicate obsIDs in the CEERS data"
+df.to_csv(CEERS_DATA_DIRECTORY + '/products_to_download.csv', index=False)  # for future reference/debugging
+
+download_mast_products_simplified(df, save_dir=CEERS_DATA_DIRECTORY, max_files=2, cache=True)
+
 # test call - downloads just a script
-download_mast_products(data_products_nircam_fixed_pointing2, save_dir=CEERS_DATA_DIRECTORY, max_files=28, chunk_size=5, curl_flag=True)
+# download_mast_products(data_products_nircam_fixed_pointing2, save_dir=CEERS_DATA_DIRECTORY, max_files=28, chunk_size=5, curl_flag=True)
 
 # real script
 # download_mast_products(data_products_nircam_fixed_pointing2, save_dir=CEERS_DATA_DIRECTORY, max_files=28, chunk_size=5)
