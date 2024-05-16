@@ -30,13 +30,6 @@ if __name__ == '__main__':
     assert not any(df['obs_id'].duplicated()), "There are duplicate obsIDs in the JADES data"
     df.to_csv(DATA_DIRECTORY + '/products_to_download.csv', index=False)
 
-    # now split into goods-s and goods-n data
-    # goods_s = [i for i in range(len(data_products)) if 'goods-s' in data_products['obs_id'][i]]
-    # goods_n = [i for i in range(len(data_products)) if 'goods-n' in data_products['obs_id'][i]]
-
-    # data_products_goods_s = data_products[goods_s]
-    # data_products_goods_n = data_products[goods_n]
-
 
     download_mast_products_simplified(df['dataURI'], save_dir=DATA_DIRECTORY, max_files=2, cache=True)
 
