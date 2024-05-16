@@ -24,6 +24,13 @@ We already have the code to do most if not all of this. We're putting it on GitH
 4. David's cutout script to extract single-band cutouts from the mosaics
 5. Hayley's colouring to make images (probably with tweaks)
 
+## Current Status
+
+- Download FITS from MAST for all surveys &#10003;
+- Find existing FITS on Datalabs &#10003; (but some are missing)
+- Create catalog from FITS: WIP, works on one CEERS band but decisions needed to generalise
+- Create cutouts from catalog/FITS: WIP, tested several options but decisions needed on final choice(s)
+
 ## Install
 
     conda create --name gz-jwst python==3.9
