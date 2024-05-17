@@ -11,7 +11,11 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 from scipy import ndimage
 import warnings
+from astropy.wcs import WCS
 from astropy.table import Table
+import os
+
+# sep.set_extract_pixstack(1000000)
 
 # Notes from team below:
 # def get_catalog(mosaic_dir, detection_kwargs):
@@ -26,7 +30,7 @@ from astropy.table import Table
 
 # etc from source_extraction.py
 
-def identify_objects(image_data,nsigma,min_area,deb_n_thresh,deb_cont,filter_kwarg,filter_size):
+def identify_objects(image_data, bkg_data=None, params={}):
     '''
     This function performs source identification using the python-based module named SEP (Barbary et al., 2016).
     :param image_data: provide the image data as an numpy.ndarray.
@@ -38,10 +42,29 @@ def identify_objects(image_data,nsigma,min_area,deb_n_thresh,deb_cont,filter_kwa
     :return: object list identified in the image, segmentation map with each object labeled from 1, 2, 3 ... The catalog of objects is
     ordered as per the segmap number.
     '''
-
+    nsigma = params['nsigma']
+    min_area = params['min_area']
+    deb_n_thresh = params['deb_n_thresh']
+    deb_cont = params['deb_cont']
+    filter_kwarg = params['filter_kwarg']
+    filter_size = params['filter_size']
+    
     byte_swaped_data = image_data.byteswap().newbyteorder() # as suggested by the SEP documentation.
-
-    global_bkg = sep.Background(byte_swaped_data) #calculating the global background
+    
+    if bkg_data is None:
+        global_bkg = sep.Background(byte_swaped_data) #calculating the global background
+        glob_rms = global_bkg.globalrms
+        print(glob_rms)
+    else:
+        bkg, bkg_mask, rms_data = bkg_data
+        global_bkg = deepcopy(bkg.byteswap().newbyteorder())
+        bkg_mask[np.where(bkg_mask>1)] = 1
+        bkg_mask+=1
+        bkg_mask[np.where(bkg_mask>1)] = 0
+        
+        masked_rms_data = rms_data * bkg_mask
+        glob_rms = np.nanpercentile(masked_rms_data[masked_rms_data!=0], 50)
+        print(f'The global median RMS = {glob_rms}')
 
     bkg_subtracted = byte_swaped_data - global_bkg #background subtracted data
 
@@ -57,19 +80,26 @@ def identify_objects(image_data,nsigma,min_area,deb_n_thresh,deb_cont,filter_kwa
         source_kernel = Box2DKernel(filter_size)# initiating a boxcar kernel of side length = filter_size
 
     ## Extract the objects and generate a segmentation map.
-    objects, segmap = sep.extract(bkg_subtracted, nsigma, err=global_bkg.globalrms, minarea=min_area, deblend_nthresh=deb_n_thresh, deblend_cont=deb_cont,segmentation_map=True, filter_kernel=source_kernel.array)
+    objects, segmap = sep.extract(bkg_subtracted, nsigma, err=glob_rms, minarea=min_area, deblend_nthresh=deb_n_thresh, deblend_cont=deb_cont,segmentation_map=True, filter_kernel=source_kernel.array)
 
     return objects, segmap # return the objects and segmentation map.
 
 
-def extract_objects_from_mosaic(filename, fits_ext, chop_mosaic=False, chop_loc=4500):
-    image_data = fits.getdata(filename, memmap=True, ext=fits_ext)
+def extract_objects_from_mosaic(filename, fits_ext, use_existing_bkg=False, sep_kwarg_dict={'nsigma':3, 'min_area': 10, 'deb_n_thresh': 32, 'deb_cont': 0.0001, 'filter_kwarg': 'tophat', 'filter_size': 7}, chop_mosaic=False, chop_loc=4500, write_info=True, overwrite_existing_catalogs=True):
+    image_data, image_header = fits.getdata(filename, memmap=True, ext=fits_ext, header=True)
+    image_wcs = WCS(image_header)
+    if use_existing_bkg:
+        background_info = (fits.getdata(filename, memmap=True, ext=9), fits.getdata(filename, memmap=True, ext=10), fits.getdata(filename, memmap=True, ext=3))
+    else:
+        background_info = None
+    
     if chop_mosaic:
         mosaic_part1, mosaic_part2 = chop_larger_mosaic(image_data, chop_loc=chop_loc, return_which_axis='y')
+        bkg_part1, bkg_part2 = chop_larger_mosaic(background_info[0], chop_loc=chop_loc, return_which_axis='y')
+        bkg_mask_part1, bkg_mask_part2 = chop_larger_mosaic(background_info[1], chop_loc=chop_loc, return_which_axis='y')
 
-        for mosaic in [mosaic_part1, mosaic_part2]:
-            objects, segmap = identify_objects(mosaic, nsigma=3,min_area=10,deb_n_thresh=32,
-                                            deb_cont=0.0001,filter_kwarg='tophat',filter_size=7)
+        for mosaic, bk_info in zip([mosaic_part1], [(bkg_part1, bkg_mask_part1)]):
+            objects, segmap = identify_objects(mosaic, bkg_data= bk_info, params=sep_kwarg_dict)
 
             objects_table = Table(objects, names=list(objects.dtype.names))
             objects_table['object_id'] = np.arange(len(objects_table))+1
@@ -80,16 +110,29 @@ def extract_objects_from_mosaic(filename, fits_ext, chop_mosaic=False, chop_loc=
             processed_table = process_object_table(objects_table, segmap, dilated_chip_gap_mask)
     else:
         mosaic = image_data
-        objects, segmap = identify_objects(mosaic, nsigma=3,min_area=10,deb_n_thresh=32,
-                                            deb_cont=0.0001,filter_kwarg='tophat',filter_size=7)
+        objects, segmap = identify_objects(mosaic, bkg_data= background_info, params=sep_kwarg_dict)
 
         objects_table = Table(objects, names=list(objects.dtype.names))
+        print(f'Source extraction found {len(objects_table)} Objects!')
+        
         objects_table['object_id'] = np.arange(len(objects_table))+1
         chip_gap_mask = make_chip_gap_mask(mosaic)
 
         dilated_chip_gap_mask = dilate_mask(chip_gap_mask, number_of_dilations=25)
         cleaned_mask = clean_artefacts_from_segmap(segmap,dilated_chip_gap_mask)
         processed_table = process_object_table(objects_table, segmap, dilated_chip_gap_mask)
+        ra, dec = image_wcs.wcs_pix2world(np.array(processed_table['x']), np.array(processed_table['y']), 0)
+        processed_table['ra'] = ra
+        processed_table['dec'] = dec
+        print(f'Processed the detected objects... now has {len(processed_table)} objects!')
+        
+        if write_info:
+            save_path = os.path.dirname(filename)
+            save_file_basename = os.path.basename(filename).strip('.fits.gz')
+            ascii.write(processed_table, f'{save_path}/{save_file_basename}_catalog.csv', format='csv', overwrite=overwrite_existing_catalogs)
+            fits.writeto(f'{save_path}/{save_file_basename}_segmap.fits', cleaned_mask, image_header, overwrite=overwrite_existing_catalogs)
+            print(f'Written the source catalog and segmentation map at {save_path}')
+                    
     return processed_table, cleaned_mask
 
 
