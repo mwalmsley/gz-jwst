@@ -2,28 +2,62 @@
 Just a refactor of the below 'large download' script from the STScI GitHub repo.
 https://github.com/spacetelescope/notebooks/blob/master/notebooks/MAST/Astroquery/large_downloads/companion_script.py
 """
+import time
+import tqdm
 import os
+import pandas as pd
 import logging
+import asyncio
 
 from astroquery.mast import Observations
 
-def get_observations(provenance_name=None, proposal_id=None, query_kwargs={}):
+def get_observations(**user_query_kwargs):
     """
     Get a table of observations for a given proposal ID or provenance name.
+    query_kwargs could be: proposal_id=foo, provenance_name=bar, instrument_name=baz, etc.
+
+    See https://astroquery.readthedocs.io/en/latest/api/astroquery.mast.ObservationsClass.html#astroquery.mast.ObservationsClass.query_criteria
+    The Column Name is the keyword, with the argument being one or more acceptable values for that parameter, 
+    except for fields with a float datatype where the argument should be in the form [minVal, maxVal]. 
+    For non-float type criteria wildcards maybe used (both * and % are considered wildcards), 
+    however only one wildcarded value can be processed per criterion
     """
+
+    default_query_kwargs = {'instrument_name':'NIRCAM/IMAGE', 'dataRights': 'PUBLIC', 'intentType': 'SCIENCE'}
+    query_kwargs = {**default_query_kwargs, **user_query_kwargs}
     # Get the list of observations for this proposal
-    if proposal_id and not provenance_name:
-        obs_table = Observations.query_criteria(proposal_id=proposal_id, **query_kwargs)
-    elif provenance_name and not proposal_id:
-        obs_table = Observations.query_criteria(provenance_name=provenance_name, **query_kwargs)
-    else:
-        logging.error('You must provide either a proposal ID or provenance name, but not both.')
-        return
+    obs_table = Observations.query_criteria(**query_kwargs)
+    logging.info(f'Found {len(obs_table)} observations, checking for products')
 
-    # Get the list of products for each observation
-    products = Observations.get_product_list(obs_table)
+    # temp: debug
+    # obs_table.to_pandas().to_csv('data/obs_table.csv', index=False)
+    # exit()
 
+    # temp: test the chunk size
+    # start_time = time.time()
+    # obs_table = obs_table[:30]
+    # products = Observations.get_product_list(obs_table)
+    # end_time = time.time()
+    # logging.info(f'Got {len(products)} products in {end_time-start_time:.2f} seconds')
+    # exit()
+
+    products = get_product_list_batched(obs_table)
     return products
+
+
+def get_product_list_batched(obs_table, chunk_size=30):
+    # https://spacetelescope.github.io/mast_notebooks/notebooks/multi_mission/large_downloads/large_downloads.html#retreive-associated-products     
+    
+    # Split the observations into chunks and aysnc ask for associated products for each chunk
+    chunks = [obs_table[i:i+chunk_size] for i in range(0, len(obs_table), chunk_size)]
+    df = pd.concat([Observations.get_product_list(chunk).to_pandas() for chunk in tqdm.tqdm(chunks, unit='observation id chunk')])
+
+    # Keep only the unique files
+    df = df.drop_duplicates(subset='productFilename')
+
+    logging.info(f'Found {len(df)} unique products')
+    # will apply per-survey filters later, in survey script
+    return df.reset_index(drop=True)
 
 
 def download_mast_products_simplified(product_uris: list[str], save_dir: str, max_files=None, cache=True):
