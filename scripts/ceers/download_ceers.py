@@ -14,22 +14,20 @@ if __name__ == '__main__':
     # NIRCAM_FILTERS = ['F115W', 'F150W', 'F200W', 'F277W', 'F356W', 'F410M', 'F444W']
 
     # get all data products associated with CEERS
-    data_products = get_observations(provenance_name=PROVENANCE_NAME, query_kwargs={'instrument_name':'NIRCAM/IMAGE'})
+    data_products = get_observations(provenance_name=PROVENANCE_NAME)
 
     # For pointing 2, there are two sets of observations for F200W and F444W, obtained 1 week apart. 
     # The second set ("b") was affected by significant persistence. 
     # The team provides mosaics of each observation separately (i.e., "2", "2b") as well as combined together ("2all").
     # I'm assuming we only want to keep the 2all images.
-    # The easiest way for me to do this was to just note the obsids we want to remove
+    # The easiest way to do this was to just note the obsids we want to remove
     additional_pointing2_ids = ['149079958','149074352','149077677','149072294']
-    omit_additonal_pointing2_data = [i for i in range(len(data_products)) if data_products['obsID'][i] not in additional_pointing2_ids]
-    data_products_fixed_pointing2 = data_products[omit_additonal_pointing2_data]
+    df = data_products[~data_products['obsID'].isin(additional_pointing2_ids)]
 
     # ok, we have 7 filters, 4 pointings, so we should expect 28
-    assert len(data_products_fixed_pointing2) == 28, "CEERS should have 28 images, ask Hayley what went wrong"
+    assert len(df) == 28, "CEERS should have 28 images, ask Hayley what went wrong"
 
-    # convert to pandas and save for future reference/debugging
-    df = data_products_fixed_pointing2.to_pandas()
+    #  save for future reference/debugging
     assert not any(df['obsID'].duplicated()), "There are duplicate obsIDs in the CEERS data"
     df.to_csv(DATA_DIRECTORY + '/products_to_download.csv', index=False)  
 
