@@ -33,6 +33,7 @@ setuptools.setup(
         'matplotlib',
         'pyarrow',  # to read parquet, which is very handy for big datasets
         'setuptools',  # no longer pinned
+        'scikit-learn',  # purely for scaling the data atm
         'sep'  # https://sep.readthedocs.io/en/v1.1.x/
     ]
 )
