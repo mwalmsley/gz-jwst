@@ -1,17 +1,12 @@
 import os
 import logging
 
+import pandas as pd
+
 from gzjwst.survey_products import get_observations, download_mast_products_simplified
 
 
-if __name__ == '__main__':
-
-    logging.basicConfig(level=logging.INFO)
-
-
-    PROVENANCE_NAME = 'ceers'
-    DATA_DIRECTORY = 'data/ceers/hlsp'
-    # NIRCAM_FILTERS = ['F115W', 'F150W', 'F200W', 'F277W', 'F356W', 'F410M', 'F444W']
+def make_ceers_product_list():
 
     # get all data products associated with CEERS
     data_products = get_observations(provenance_name=PROVENANCE_NAME)
@@ -29,7 +24,21 @@ if __name__ == '__main__':
 
     #  save for future reference/debugging
     assert not any(df['obsID'].duplicated()), "There are duplicate obsIDs in the CEERS data"
-    df.to_csv(DATA_DIRECTORY + '/products_to_download.csv', index=False)  
+    return df
+
+
+if __name__ == '__main__':
+
+    logging.basicConfig(level=logging.INFO)
+
+
+    PROVENANCE_NAME = 'ceers'
+    DATA_DIRECTORY = 'data/ceers/hlsp'
 
     # TODO set max_files=None to download all
-    download_mast_products_simplified(product_uris=df['dataURI'], save_dir=DATA_DIRECTORY, max_files=2, cache=True)  
+    # df = make_ceers_product_list()
+    # df.to_csv(DATA_DIRECTORY + '/products_to_download.csv', index=False)  
+
+    df = pd.read_csv('data/ceers/hlsp/products_to_download_nircam3_only.csv')  # temporary, for SEP testing
+
+    download_mast_products_simplified(product_uris=df['dataURI'], save_dir=DATA_DIRECTORY, max_files=10, cache=True)  
