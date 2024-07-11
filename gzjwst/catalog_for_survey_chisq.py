@@ -1,1 +1,0 @@
-# use chi-squared stacked detection image and photutils to create JWST catalog of sources
