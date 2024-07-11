@@ -14,13 +14,11 @@ def get_detection_image(fits_locs: list) -> np.ndarray:
     
     for loc in tqdm.tqdm(fits_locs):
       logging.info(f'loading {loc}')
-      science_image = fits.getdata(loc, memmap=False, ext=1, header=False),  # background-subtracted science image
-      # print(type(science_image))
+      science_image = fits.getdata(loc, memmap=False, ext=1, header=False)  # background-subtracted science image
+
       if isinstance(science_image, tuple):
-        # logging.warning(f'science image for loc {loc} is a tuple, taking first element')
         science_image = science_image[0]
       background_source_mask = fits.getdata(loc, memmap=False, ext=10, header=False)
-      # print(type(background_source_mask))
       assert science_image.shape == background_source_mask.shape, f"science image and mask shape mismatch"
     
       random_image = get_alleged_random_background_image(science_image, background_source_mask)
@@ -44,7 +42,7 @@ def get_detection_image(fits_locs: list) -> np.ndarray:
     pixel_prob_of_source = np.where(dof == 0, 0, pixel_prob_of_source)
     return pixel_prob_of_source, dof
 
-    # using the R image convention from szalay et al 1999, 3.2
+    # using the R image convention from szalay et al 1999, 3.2?
     # return np.sqrt(np.sum(np.stack(normalised_science_images, axis=-1), axis=-1))
 
 def get_alleged_random_background_image(science_image_bkg_subtracted, background_source_mask):
@@ -56,7 +54,7 @@ def get_alleged_random_background_image(science_image_bkg_subtracted, background
 
 def std_estimator(x):
     # return np.sqrt(np.sum((x - np.mean(x))**2) / (len(x) - 1))
-      # general biased esimator
+    # no, general biased esimator
     # https://en.wikipedia.org/wiki/Unbiased_estimation_of_standard_deviation#Rule_of_thumb_for_the_normal_distribution
     return np.sqrt(np.sum((x - np.mean(x))**2) / (len(x)-1.5))  # biased estimator
 
