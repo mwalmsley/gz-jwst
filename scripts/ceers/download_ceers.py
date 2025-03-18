@@ -32,13 +32,16 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
 
 
+    # this uses the CEERS HLSP products
     PROVENANCE_NAME = 'ceers'
     DATA_DIRECTORY = 'data/ceers/hlsp'
 
+
+    df = make_ceers_product_list()
+    df.to_csv(DATA_DIRECTORY + '/products_to_download.csv', index=False)  
+
+    df = pd.read_csv('data/ceers/hlsp/products_to_download.csv')  # everything
+    # df = pd.read_csv('data/ceers/hlsp/products_to_download_nircam3_only.csv')  # temporary, for SEP testing
+
     # TODO set max_files=None to download all
-    # df = make_ceers_product_list()
-    # df.to_csv(DATA_DIRECTORY + '/products_to_download.csv', index=False)  
-
-    df = pd.read_csv('data/ceers/hlsp/products_to_download_nircam3_only.csv')  # temporary, for SEP testing
-
     download_mast_products_simplified(product_uris=df['dataURI'], save_dir=DATA_DIRECTORY, max_files=10, cache=True)  

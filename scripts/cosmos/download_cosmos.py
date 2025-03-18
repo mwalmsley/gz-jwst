@@ -34,4 +34,4 @@ if __name__ == '__main__':
     df = pd.read_csv(DATA_DIRECTORY + '/products_to_download.csv')
 
     # TODO set max_files=None to download all
-    download_mast_products_simplified(product_uris=df['dataURI'], save_dir=DATA_DIRECTORY, max_files=None, cache=True)  
+    download_mast_products_simplified(product_uris=df['dataURI'], save_dir=DATA_DIRECTORY, max_files=10, cache=True)  
