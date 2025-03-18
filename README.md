@@ -50,6 +50,9 @@ Astroquery is separate because it has a [weird pip release style](https://astroq
 
 For each survey, run the `scripts/{survey}/download_{survey}.py` script. This first creates a list of products (FITS tiles) to download, and then downloads them from MAST.
 
+## Catalogues Used (ILG, feel free to edit)
+Catalogues are downloaded from http://www.astrodeep.eu/astrodeep-jwst-catalogs/, specifically https://owncloud.ia2.inaf.it/index.php/s/2N29s4Cp3hUKEEE. Download the tar.gz file named ASTRODEEP-JWST_optap.tar.gz. This contains the following catalogues: ABELL2744, CEERS, JADES-GN, JADES-GS, NGDEEP, PRIMER_COSMOS and PRIMER_UDS. These tables are concatenated in topcat, and lablled in the column `which_catalogue`.
+
 
 
 ## How the Pipeline Runs for All Surveys
