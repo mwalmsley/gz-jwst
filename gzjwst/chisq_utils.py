@@ -1,5 +1,7 @@
 # use chi-squared stacked detection image and photutils to create JWST catalog of sources
 import logging
+import glob
+
 import tqdm
 import numpy as np
 from scipy.special import factorial
@@ -66,3 +68,18 @@ def get_pixel_prob_of_source(y, dof_counter):
   return chi2.cdf(y, dof_counter)  # 1 - cdf
 
     # return 0.5 * r_image**3 * np.exp(-r_image**2 / 2)
+
+
+def get_example_fits_locs(debug=False):
+  fits_locs = []
+
+  filter_bands = ['f115w', 'f150w', 'f200w','f277w', 'f356w', 'f444w']
+  if debug:
+    filter_bands = filter_bands[2:3]
+
+  for filter_band in filter_bands:
+      fits_loc_for_filter = glob.glob('/home/walml/repos/gz-jwst/data/dev_data/hlsp_ceers_*_nircam6*{}*i2d.fits.gz'.format(filter_band))
+      assert len(fits_loc_for_filter) == 1, filter_band
+      fits_locs += fits_loc_for_filter
+
+  return fits_locs

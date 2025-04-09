@@ -34,6 +34,8 @@ setuptools.setup(
         'pyarrow',  # to read parquet, which is very handy for big datasets
         'setuptools',  # no longer pinned
         'scikit-learn',  # purely for scaling the data atm
+        'photutils',
+        'scikit-image',  # for photutils
         'sep'  # https://sep.readthedocs.io/en/v1.1.x/
     ]
 )

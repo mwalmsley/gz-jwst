@@ -77,7 +77,8 @@ def identify_objects(image_data, bkg_data=None, sep_config: SEPConfig=SEPConfig(
         print(f'The global median RMS = {glob_rms}')
 
     bkg_subtracted = byte_swaped_data - global_bkg #background subtracted data
-
+    
+    # apply a convolution / filter to the data
     if sep_config.filter_kwarg.lower() not in ['tophat','gauss','boxcar']:#check if the filter keyword exists in list of supported filters.
         warnings.warn('The filter %s is not supported as of yet, defaulting to tophat of radius 5') #if doesn't exist, then warn the user
         source_kernel = Tophat2DKernel(5) #default to the Tophat kernel of radius 5 pixels
